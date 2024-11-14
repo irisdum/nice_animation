@@ -14,7 +14,7 @@ class ColorMatrixScene(Scene):
         super().__init__()
         self.T = T
         self.ms_colors = [GREY_E, PURE_BLUE, PURE_GREEN, PURE_RED]
-        self.n_pix = 6
+        self.n_pix = 4
 
 
     def construct(self):
@@ -30,7 +30,7 @@ class ColorMatrixScene(Scene):
                 ms_images.next_to(l_images[i - 1], buff=0.55)
             sits_group.add(ms_images)
         sits_group = sits_group.scale_to_fit_width(0.4 * config.frame_width)
-        input_text=Text("Input SITS",color=BLACK,font="sans-serif",font_size=9)
+        input_text=Text("Input SITS",color=BLACK,font="sans-serif",font_size=19)
         input_text.next_to(sits_group,direction=LEFT)
         self.add(input_text)
         ms_width = sits_group[1].width
@@ -70,12 +70,12 @@ class ColorMatrixScene(Scene):
             self.play(FadeIn(encoded_patch), sits_group[idx].animate.scale(1 / 1.05))
             self.wait(0.01)
         intermediate_embedding = Group(*l_encoded_path)
-        transformer = Model(label="Transformer", color=BLUE_A, width=sste.width, height=1)
+        transformer = Model(label="Temporal Transformer" , color=BLUE_A, width=sste.width, height=1)
         transformer.next_to(intermediate_embedding, direction=UP, buff=0.2)
         self.add(transformer)
         self.play(FadeIn(transformer))
         self.wait(0.05)
-        for id_pix in range(3):
+        for id_pix in range(self.n_pix**2):
             actions=[]
             out_actions=[]
             for t in range(T):
@@ -84,20 +84,22 @@ class ColorMatrixScene(Scene):
                     red_border = Rectangle(width=pixel.width + 0.001, height=pixel.height + 0.001, fill_opacity=0,
                                            stroke_opacity=1, stroke_color=PURE_RED, stroke_width=2)
                     red_border.move_to(pixel.get_center())
+                    red_border.z_index=c
                     actions+=[FadeIn(red_border)]
                     out_actions+=[FadeOut(red_border)]
 
-            self.play(*actions)
+            self.play(*actions,run_time=0.2)
+            self.wait(0.005)
             #self.wait(0.01)
             display_lat_repr_pix=[]
-
             for t in range(T):
                 for feat in range(2):
                     l_latent_repr[t][feat][id_pix].z_index=feat
                     self.add(l_latent_repr[t][feat][id_pix])
                     display_lat_repr_pix+=[FadeIn(l_latent_repr[t][feat][id_pix])]
-            self.play(*display_lat_repr_pix)
-            self.wait(0.0005)
-            self.play(*out_actions)
-
+            self.play(*display_lat_repr_pix,run_time=0.2)
+            self.wait(0.005)
+            self.play(*out_actions,run_time=0.2)
+            self.wait(0.005)
+        self.wait(0.05)
 
