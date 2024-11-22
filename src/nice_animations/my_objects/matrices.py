@@ -1,3 +1,4 @@
+from manim import ManimColor, Group, Square
 from random import shuffle
 
 from manim import *
@@ -41,6 +42,7 @@ class MSImage(Mobject):
             matrix.move_to((shift*k,-shift*k,0))
             #matrix.move_to(square_size * (k - 1.5, 1.5 - k, 0))
             self.add(matrix)
+
 def create_ms_images(colors: list[ManimColor], square_size, n_pix=4, n_im: int = 4,shift:float=0.3)->Group:
     ms_image=Group()
     assert len(colors) == n_im
@@ -64,3 +66,17 @@ class VisuSITS(Mobject):
                 ms_images.next_to(l_images[i-1])
             self.add(ms_images)
         self.all_images=ms_images
+
+
+def create_vector(row: int, col: int, color: ManimColor, square_size=1,stroke_width=5) -> Group:
+    # print(color_shades)
+    # Create the 3x3 grid of squares
+    one_vector = Group()
+    for i in range(row):
+        for j in range(col):
+            square = Square(side_length=square_size, stroke_color=color, stroke_width=stroke_width,
+                            fill_color=color, fill_opacity=0.2)
+            # Position each square
+            square.move_to( (square_size*(j - 1), square_size*(1 - i), 0))  # Offset for correct grid layout
+            one_vector.add(square)
+    return one_vector

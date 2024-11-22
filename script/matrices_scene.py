@@ -36,7 +36,7 @@ class ColorMatrixScene(Scene):
         ms_width = sits_group[1].width
         # sits=sits.scale(0.1)
         self.add(sits_group)
-        sste = Model(label="Spectro Spatial Encoder", color=GOLD_A, width=int(0.8 * sits_group.width), height=1)
+        sste = Model(label="Spectro Spatial Encoder", color=GRAY_A, width=int(0.8 * sits_group.width), height=1)
         sste.next_to(sits_group, direction=UP, buff=0.3)
         #print( sste.get_top() )
         self.camera.frame_center = sste.get_top() + np.array([0,0.5,0])
@@ -70,7 +70,7 @@ class ColorMatrixScene(Scene):
             self.play(FadeIn(encoded_patch), sits_group[idx].animate.scale(1 / 1.05))
             self.wait(0.01)
         intermediate_embedding = Group(*l_encoded_path)
-        transformer = Model(label="Temporal Transformer" , color=BLUE_A, width=sste.width, height=1)
+        transformer = Model(label="Temporal Transformer" , color=GRAY_A, width=sste.width, height=1)
         transformer.next_to(intermediate_embedding, direction=UP, buff=0.2)
         self.add(transformer)
         self.play(FadeIn(transformer))
