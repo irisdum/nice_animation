@@ -9,7 +9,7 @@ config.frame_width = 31
 
 
 class Attention(Scene):
-    def __init__(self, T: int = 30, min_T: int = 20, square_size: int = 1,font_size:int=33):
+    def __init__(self, T: int = 30, min_T: int = 20, square_size: int = 0.9,font_size:int=33):
         super().__init__()
         self.T = T
         self.min_T = min_T
@@ -22,7 +22,7 @@ class Attention(Scene):
         query= create_item("Query", "Q=XW_Q", 4, 2, PURE_RED, square_size=self.square_size, font_size=self.font_size)
         key= create_item("Key", "K^{T}=W_K^{T}X^{T}", 2, 4, PURE_GREEN, square_size=self.square_size, font_size=self.font_size)
         value= create_item("Value", "V=XW_V", 4, 3, color=PINK, square_size=self.square_size, font_size=self.font_size)
-        score= create_item("Attention score", "A=\sigma({QK^T}/{d_K})", 4, 4, square_size=self.square_size, font_size=self.font_size, color=BLACK)
+        score= create_item("Attention score", "A=\sigma({QK^T}/ \sqrt{d_K})", 4, 4, square_size=self.square_size, font_size=self.font_size, color=BLACK)
         output= create_item("Output", "O=AV", 4, 3, color=GOLD_E, square_size=self.square_size, font_size=self.font_size)
         self.add(input)
         self.camera.frame_center = input.get_center()+np.array([12,0,0])

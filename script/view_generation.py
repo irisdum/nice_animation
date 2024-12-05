@@ -31,24 +31,29 @@ class ViewGeneration(Scene):
         for t in range(4, self.min_T + 4):
             square = Square(side_length=self.square_size, stroke_color=BLACK, stroke_width=3, color=GRAY_A,
                             fill_opacity=0.1)
-            square.next_to(input_sequence[t], direction=DOWN, buff=0)
+            square.move_to(input_sequence[t].get_center())
             little_sequence.add(square)
-        label_little_sequence = Text("Input SITS", font_size=25,color=BLACK)
-        label_little_sequence.next_to(little_sequence, direction=LEFT)
+
         self.camera.frame_center = little_sequence.get_center() + np.array([0, -2, 0])
         #self.add(label_little_sequence)
-        group_little_sequence=Group()
-        group_little_sequence.add(little_sequence,label_little_sequence)
-        #self.add(little_sequence)
+
+        #self.add(group_little_sequence)
+        self.wait(1)
+        self.play(FadeIn(little_sequence))
+        self.play(little_sequence.animate.move_to(little_sequence.get_center()+np.array([0, -1, 0])))
+        group_little_sequence = Group()
+        label_little_sequence = Text("Input SITS", font_size=25, color=BLACK)
+        label_little_sequence.next_to(little_sequence, direction=LEFT)
+        group_little_sequence.add(little_sequence, label_little_sequence)
+        # self.add(little_sequence)
         double_arrow_T = DoubleArrow(little_sequence.get_left(), little_sequence.get_right(), color=BLACK, buff=0,
-                                   tip_length=0.2)
-        double_arrow_T.next_to(little_sequence,direction=UP)
+                                     tip_length=0.2)
+        double_arrow_T.next_to(little_sequence, direction=UP,buff=0.1)
         txt_arrow = MathTex("T", font_size=30, color=BLACK)
         txt_arrow.next_to(double_arrow_T, direction=UP, buff=0.1)
-        #self.add(double_arrow_T)
-        group_little_sequence.add(little_sequence, label_little_sequence,double_arrow_T,txt_arrow)
-        self.add(group_little_sequence)
-        self.play(group_little_sequence.animate.move_to(little_sequence.get_center()+np.array([0, -1, 0])))
+        # self.add(double_arrow_T)
+        group_little_sequence.add(little_sequence, label_little_sequence, double_arrow_T, txt_arrow)
+        self.play(FadeIn(label_little_sequence),FadeIn(double_arrow_T),FadeIn(txt_arrow))
         self.wait(1)
         group_viewa = []
         group_viewb = []

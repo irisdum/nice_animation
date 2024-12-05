@@ -4,7 +4,12 @@ from nice_animations.my_objects.matrices import create_vector
 
 config.background_color = WHITE
 config.pixel_height = 1080
-config.pixel_width = 1920
+config.pixel_width = 1320
+config.frame_height = 20
+config.frame_width = 30
+
+
+
 
 
 def construct_one_sample(idx: int | str = 1, font_size=30, key_feat: int = 2, val_feat: int = 3, square_size: float = 1,
@@ -42,6 +47,7 @@ class BroadDef(Scene):
         self.T = T
 
     def construct(self):
+
         l_input = Group()
         beg = Text("{", font_size=self.font_size + 60, color=BLACK)
         end = Text("}", font_size=self.font_size + 60, color=BLACK)
@@ -52,8 +58,9 @@ class BroadDef(Scene):
             l_keys += [sample[1][0]]
             l_values += [sample[3][0]]
             l_input.add(sample)
-            virgule = Text(",", font_size=self.font_size + 40, color=BLACK)
-            l_input.add(virgule)
+            if i<4:
+                virgule = Text(",", font_size=self.font_size + 40, color=BLACK)
+                l_input.add(virgule)
         l_input.arrange(RIGHT, buff=0.5)
         # virgule2 = Text(",", font_size=self.font_size + 40, color=BLACK)
         # n_sample.next_to(l_input.get_right()+np.array([5,0,0]))
@@ -97,7 +104,7 @@ class BroadDef(Scene):
         global_group = Group(input_seq, query_group, group_arrow, weighted_values, output_group, group_plus, equal_text,
                              temp_weight)
         global_group.scale_to_fit_width(0.9 * config.frame_width)
-        self.camera.frame_center = global_group.get_center()
+        self.camera.frame_center = global_group.get_bottom()+np.array([0,-1,0])
         self.add(input_seq)
         self.wait(1)
         self.add(query_group)
@@ -113,7 +120,7 @@ class BroadDef(Scene):
 
 
 class VaswaniAttention(Scene):
-    def __init__(self, T: int = 30, square_size: int = 2, font_size: int = 70):
+    def __init__(self, T: int = 30, square_size: int = 2, font_size: int = 90):
         super().__init__()
         self.font_size = font_size
         self.square_size = square_size
@@ -125,13 +132,13 @@ class VaswaniAttention(Scene):
         for i in range(3):
             hightlight_score = Group(*[score[0][i * 4 + j] for j in range(4)])
             removed_score = Group(*[plot_scores[i * 4 + j] for j in range(4)])
-            new_labels = Group(*[MathTex(r"a_{" + f"{i},{j}" + r"}", font_size=20, color=BLACK) for j in range(4)])
+            new_labels = Group(*[MathTex(r"a_{" + f"{i+1},{j+1}" + r"}", font_size=50, color=BLACK) for j in range(4)])
             for idx, elem in enumerate(new_labels):
                 elem.move_to(removed_score[idx].get_center())
             new_labels.move_to(hightlight_score.get_center())
             # plot_norm_score=Group(*[normalized_score[0][i * 4 + j] for j in range(4)])
             self.play(hightlight_score.animate.set_color(GRAY_A), FadeOut(removed_score), FadeIn(new_labels))
-            self.wait(0.2)
+            self.wait(1)
             self.play(hightlight_score.animate.set_color(BLACK))
         self.wait(1)
 
@@ -155,7 +162,7 @@ class VaswaniAttention(Scene):
                           font_size=self.font_size)
         value = create_item("Value", "V=X_B W_V", 4, 3, color=PINK, square_size=self.square_size,
                             font_size=self.font_size)
-        score = create_item("Attention score", "A=\sigma({QK^T}/{d_K})", 3, 4, square_size=self.square_size,
+        score = create_item("Attention score", r"A=\sigma({QK^T}/{\sqrt{d_K}})", 3, 4, square_size=self.square_size,
                             font_size=self.font_size, color=BLACK)
 
         output = create_item("Output", "O=AV", 4, 3, color=GOLD_E, square_size=self.square_size,
@@ -184,30 +191,30 @@ class VaswaniAttention(Scene):
         dk_labels.next_to(arrow_dk, DOWN, buff=0.1 * self.square_size)
         global_group = Group(labeled_input1, labeled_input2, query, key, value, score, output, arrow_value, arrow_key,
                              arrow_query, group_label_score)
-        global_group.scale_to_fit_height(0.9 * config.frame_height)
-        # global_group.scale_to_fit_width(0.9*config.frame_width)
+        global_group.scale_to_fit_height(0.99* config.frame_height)
+
         self.camera.frame_center = global_group.get_center()
         self.add(labeled_input1, labeled_input2, query, key, value, arrow_query, arrow_value, arrow_key)
         self.wait(1)
         plot_scores = Group()
         for i in range(3):
             if i == 0:
-                wait_time = 0.5
+                wait_time = 1
             else:
-                wait_time = 0.01
+                wait_time = 1
             l_query = [query[0][i * 2 + k] for k in range(2)]
             group_query = Group(*l_query)
-            one_query = MathTex(r"\mathbf{q}" + f"_{i}", color=BLACK, font_size=30)
+            one_query = MathTex(r"\mathbf{q}" + f"_{i}", color=BLACK, font_size=70)
             one_query.next_to(group_query.get_right(), RIGHT, buff=0.2 * self.square_size)
             self.add(one_query)
             self.play(group_query.animate.set_color(BLACK), run_time=0.1)
             for j in range(4):
                 l_key = [key[0][k] for k in [j, 4 + j]]
                 group_key = Group(*l_key)
-                one_key = MathTex(r"\mathbf{k}" + f"_{j}", color=BLACK, font_size=30)
+                one_key = MathTex(r"\mathbf{k}" + f"_{j+1}", color=BLACK, font_size=70)
                 one_key.next_to(group_key.get_bottom(), DOWN, buff=0.1 * self.square_size)
-                plot_score = MathTex(r"\frac{\mathbf{q}" + f"_{i}" + r"\mathbf{k}^T" + f"_{j}" + r"}{d_K}", color=BLACK,
-                                     font_size=self.square_size * 8)
+                plot_score = MathTex(r"\frac{\mathbf{q}" + f"_{i+1}" + r"\mathbf{k}^T" + f"_{j}" + r"}{\sqrt{d_K}}", color=BLACK,
+                                     font_size=40)
                 plot_score.move_to(score[0][i * 4 + j].get_center())
                 plot_scores.add(plot_score)
                 self.add(one_key)
@@ -221,12 +228,12 @@ class VaswaniAttention(Scene):
         self.wait(1)
         self.add(group_label_score)
         # self.add(text_norm_score,arrow_normalized_score,arrow_norm_label,math_norm)
-        self.wait(0.1)
+        self.wait(1)
         self.update_scores(score, plot_scores)
 
         group_scores = Group(score, label_score_x, label_score_y)
-        arrow_score_output = Arrow(group_scores.get_bottom(), output.get_top(), color=BLACK)
-        arrow_value_output = Arrow(value.get_right(), output.get_left(), color=BLACK)
+        arrow_score_output = Arrow(group_scores.get_bottom(), output.get_top(), color=BLACK,tip_length=arrow_value.tip_length).scale(0.8)
+        arrow_value_output = Arrow(value.get_right(), output.get_left(), color=BLACK,tip_length=arrow_value.tip_length)
         self.add(output[1], output[2])
         self.play(FadeIn(arrow_score_output), FadeIn(arrow_value_output))
         for i in range(3):
@@ -238,25 +245,20 @@ class VaswaniAttention(Scene):
 
                 group_value = Group(*l_value)
                 self.play(group_value.animate.set_color(LIGHTER_GRAY),
-                          FadeIn(output[0][i * 3 + j]), run_time=0.3)
+                          FadeIn(output[0][i * 3 + j]))
                 self.play(group_value.animate.set_color(PINK),
                           run_time=0.1)
             self.play(group_score.animate.set_color(BLACK))
         self.wait(1)
 
-
-class CAFlexibleRec(Scene):
+class CALQ(Scene):
     def __init__(self, square_size: int = 2, font_size: int = 70):
         super().__init__()
         self.square_size = square_size
         self.font_size = font_size
-    def construct(self):
-        label_tok=MathTex(r"M_{\beta}",font_size=self.font_size,color=BLACK)
 
-        token=create_vector(1,2,color=PURE_RED,square_size=self.square_size)
-        l_tok = Group(*[token.copy(), token.copy()])
-        print(token)
-        label_tok.next_to(token,LEFT,buff=0.1*self.square_size)
+    def construct(self):
+
         input1 = create_item("Sequence A ", "X_A", 3, 2, BLACK, square_size=self.square_size, font_size=self.font_size)
         input2 = create_item("Sequence B ", "X_B", 4, 2, BLACK, square_size=self.square_size, font_size=self.font_size)
         input2.next_to(input1.get_bottom(), DOWN, buff=3 * self.square_size)
@@ -270,16 +272,16 @@ class CAFlexibleRec(Scene):
         arrow_axis2.next_to(input2[0].get_center(), LEFT, buff=2 * self.square_size)
         axis2.next_to(arrow_axis2, LEFT, buff=0.1 * self.square_size)
         labeled_input2 = Group(input2, axis2, arrow_axis2)
-        query = create_item("Query", "Q=X_A W_Q", 3, 2, PURE_RED, square_size=self.square_size,
+        query = create_item("Query", r"Q_{\alpha}", 3, 2, PURE_RED, square_size=self.square_size,
                             font_size=self.font_size)
         key = create_item("Key", "K^{T}=W_K^{T}X_B{T}", 2, 4, PURE_GREEN, square_size=self.square_size,
                           font_size=self.font_size)
         value = create_item("Value", "V=X_B W_V", 4, 3, color=PINK, square_size=self.square_size,
                             font_size=self.font_size)
-        score = create_item("Attention score", "A=\sigma({QK^T}/{d_K})", 3, 4, square_size=self.square_size,
+        score = create_item("Attention score", "A=\sigma({QK^T}/\sqrt{d_K})", 3, 4, square_size=self.square_size,
                             font_size=self.font_size, color=BLACK)
 
-        output = create_item("Output", "O=AV", 4, 3, color=GOLD_E, square_size=self.square_size,
+        output = create_item("Output", "O=AV", 3, 3, color=GOLD_E, square_size=self.square_size,
                              font_size=self.font_size)
 
         query.move_to(input1.get_center() + np.array([self.square_size * 5, 0, 0]))
@@ -303,24 +305,151 @@ class CAFlexibleRec(Scene):
         arrow_dk = DoubleArrow(query[0].get_bottom(), query[0].get_top(), color=BLACK)
         arrow_dk.next_to(query[0], DOWN, buff=0.1 * self.square_size)
         dk_labels.next_to(arrow_dk, DOWN, buff=0.1 * self.square_size)
+        query.align_to(key[0], RIGHT)
+        arrow_score_query = Arrow(query.get_right(), score.get_left(), color=BLACK,
+                                  stroke_width=arrow_query.stroke_width)
+        arrow_score_key = Arrow(key.get_right(), score.get_left(), color=BLACK, stroke_width=arrow_query.stroke_width)
+        arrow_score_output = Arrow(score.get_bottom(), output.get_top(), color=BLACK,
+                                   stroke_width=arrow_query.stroke_width)
+        arrow_value_output = Arrow(value.get_right(), output.get_left(), color=BLACK,
+                                   stroke_width=arrow_query.stroke_width)
+
         global_group = Group(labeled_input1, labeled_input2, query, key, value, score, output, arrow_value, arrow_key,
-                             arrow_query, group_label_score,token,label_tok,l_tok)
-        global_group.scale_to_fit_height(0.9 * config.frame_height)
+                             arrow_query, group_label_score,arrow_score_query,arrow_score_output,arrow_score_key,arrow_value_output)
+        global_group.scale_to_fit_height(0.8 * config.frame_height)
+        # global_group.scale_to_fit_width(0.9*config.frame_width)
+        self.camera.frame_center = global_group.get_center()
+        #create queries
+
+        self.add(input2)
+        self.wait(1)
+        self.add(key,value,arrow_key,arrow_value)
+        self.wait(1)
+        self.add(query)
+        self.wait(1)
+        self.add(score,arrow_score_key,arrow_score_query)
+        self.wait(1)
+        #group_scores = Group(score, label_score_x, label_score_y)
+        self.add(arrow_score_output, arrow_value_output,output)
+        self.wait(1)
+class CAFlexibleRec(Scene):
+    def __init__(self, square_size: int = 2, font_size: int = 70):
+        super().__init__()
+        self.square_size = square_size
+        self.font_size = font_size
+    def update_scores(self, score, plot_scores):
+        self.add(score[1], score[2])
+        self.wait(1)
+        for i in range(3):
+            hightlight_score = Group(*[score[0][i * 4 + j] for j in range(4)])
+            removed_score = Group(*[plot_scores[i * 4 + j] for j in range(4)])
+            new_labels = Group(*[MathTex(r"a_{" + f"{i+1},{j+1}" + r"}", font_size=20, color=BLACK) for j in range(4)])
+            for idx, elem in enumerate(new_labels):
+                elem.move_to(removed_score[idx].get_center())
+            new_labels.move_to(hightlight_score.get_center())
+            # plot_norm_score=Group(*[normalized_score[0][i * 4 + j] for j in range(4)])
+            self.play(hightlight_score.animate.set_color(GRAY_A), FadeOut(removed_score), FadeIn(new_labels))
+            self.wait(0.2)
+            self.play(hightlight_score.animate.set_color(BLACK))
+        self.wait(1)
+    def construct(self):
+        label_tok=MathTex(r"M_{\beta}",font_size=self.font_size+30,color=BLACK)
+
+        token=create_vector(1,2,color=PURE_RED,square_size=self.square_size)
+        l_tok = Group(*[token.copy(), token.copy()])
+        #print(token)
+        label_tok.next_to(token,LEFT,buff=0.1*self.square_size)
+        input1 = create_item("Sequence A ", "X_A", 3, 2, BLACK, square_size=self.square_size, font_size=self.font_size)
+        input2 = create_item("Sequence B ", "X_B", 4, 2, BLACK, square_size=self.square_size, font_size=self.font_size)
+        input2.next_to(input1.get_bottom(), DOWN, buff=3 * self.square_size)
+        axis1 = MathTex("l_A", font_size=self.font_size + 10, color=BLACK)
+        arrow_axis1 = DoubleArrow(input1[0].get_top(), input1[0].get_bottom(), color=BLACK)
+        arrow_axis1.next_to(input1[0].get_center(), LEFT, buff=2 * self.square_size)
+        axis1.next_to(arrow_axis1, LEFT, buff=0.1 * self.square_size)
+        labeled_input1 = Group(input1, axis1, arrow_axis1)
+        axis2 = MathTex("l_B", font_size=self.font_size + 10, color=BLACK)
+        arrow_axis2 = DoubleArrow(input2[0].get_top(), input2[0].get_bottom(), color=BLACK)
+        arrow_axis2.next_to(input2[0].get_center(), LEFT, buff=2 * self.square_size)
+        axis2.next_to(arrow_axis2, LEFT, buff=0.1 * self.square_size)
+        labeled_input2 = Group(input2, axis2, arrow_axis2)
+        query = create_item("Query", "Q", 3, 2, PURE_RED, square_size=self.square_size,
+                            font_size=self.font_size)
+        key = create_item("Key", "K^{T}=W_K^{T}X_B{T}", 2, 4, PURE_GREEN, square_size=self.square_size,
+                          font_size=self.font_size)
+        value = create_item("Value", "V=X_B W_V", 4, 3, color=PINK, square_size=self.square_size,
+                            font_size=self.font_size)
+        score = create_item("Attention score", "A=\sigma({QK^T}/\sqrt{d_K})", 3, 4, square_size=self.square_size,
+                            font_size=self.font_size, color=BLACK)
+
+        output = create_item("Output", "O=AV", 3, 3, color=GOLD_E, square_size=self.square_size,
+                             font_size=self.font_size)
+
+        query.move_to(input1.get_center() + np.array([self.square_size * 5, 0, 0]))
+        key.move_to(input2.get_center() + np.array([self.square_size * 5, self.square_size * 3, 0]))
+        score.next_to(key, RIGHT, buff=2 * self.square_size)
+        label_score_y = MathTex("l_A", font_size=self.font_size + 10, color=BLACK)
+        arrow_y = DoubleArrow(score[0].get_bottom(), score[0].get_top(), color=BLACK)
+        arrow_y.next_to(score[0].get_left(), LEFT, buff=0.1 * self.square_size)
+        label_score_y.next_to(arrow_y.get_left(), LEFT, buff=0.1 * self.square_size)
+        label_score_x = MathTex("l_B", font_size=self.font_size + 10, color=BLACK)
+        arrow_x = DoubleArrow(score[0].get_left(), score[0].get_right(), color=BLACK)
+        arrow_x.next_to(score[0].get_bottom(), DOWN, buff=0.05 * self.square_size)
+        label_score_x.next_to(arrow_x.get_bottom(), DOWN, buff=0.05 * self.square_size)
+        group_label_score = Group(label_score_x, arrow_x, label_score_y, arrow_y)
+        value.move_to(input2.get_center() + np.array([self.square_size * 7, self.square_size * -2, 0]))
+        arrow_query = Arrow(input1.get_right(), query.get_left(), color=BLACK)
+        arrow_key = Arrow(input2.get_right(), key.get_left(), color=BLACK)
+        arrow_value = Arrow(input2.get_right(), value.get_left(), color=BLACK)
+        output.next_to(value.get_center() + np.array([5 * self.square_size, -1 * self.square_size, 0]))
+        dk_labels = MathTex(r"d_{K}", font_size=self.font_size + 10, color=BLACK)
+        arrow_dk = DoubleArrow(query[0].get_bottom(), query[0].get_top(), color=BLACK)
+        arrow_dk.next_to(query[0], DOWN, buff=0.1 * self.square_size)
+        dk_labels.next_to(arrow_dk, DOWN, buff=0.1 * self.square_size)
+        query_group = Group(token, *l_tok)
+        label_query = MathTex("Q", font_size=50, color=PURPLE_D)
+
+        arrow_score_key = Arrow(key.get_right(), score.get_left(), color=BLACK, stroke_width=arrow_query.stroke_width)
+        arrow_score_output = Arrow(score.get_bottom(), output.get_top(), color=BLACK,stroke_width=arrow_query.stroke_width)
+        arrow_value_output = Arrow(value.get_right(), output.get_left(), color=BLACK,stroke_width=arrow_query.stroke_width)
+        global_group = Group(labeled_input1, labeled_input2, query, key, value, score, output, arrow_value, arrow_key,
+                             arrow_query, group_label_score, token, label_tok, l_tok,arrow_score_key,
+                             arrow_score_output,arrow_value_output,query_group)
+        global_group.scale_to_fit_height(0.85 * config.frame_height)
         # global_group.scale_to_fit_width(0.9*config.frame_width)
         self.camera.frame_center = global_group.get_center()
         #create queries
         self.add(labeled_input2,token,label_tok)
         self.wait(1)
         self.add(l_tok)
-        query_group=Group(token)
-        pe_label=Group(MathTex(r"\phi(1)",color=BLACK,font_size=5).move_to(token.get_center()))
+        query_group=Group(token,*l_tok)
         for idx,tok in enumerate(l_tok):
             self.play(tok.animate.next_to(token.get_bottom(),DOWN,buff=idx*tok.width*0.5))
-            pe_label.add(MathTex(r"\phi(t_{" + f"{idx}"+r"}", color=BLACK, font_size=30).move_to(tok.get_center()))
-            query_group.add(tok)
+        pe_label = Group(MathTex(r"\phi(1)", color=BLACK, font_size=5).move_to(token.get_center()))
+        pe_encoding = query_group.copy()
+        pe_encoding.set_color(BLUE)
+        pe_encoding.next_to(query_group.get_right(), RIGHT, buff=2)
+        label_pe = Text("PE", font_size=30, color=BLUE)
+        label_pe.next_to(pe_encoding, UP, buff=0.1)
+        for idx,elem in enumerate(pe_encoding):
+            pe_label.add(
+                MathTex(r"\phi(t_{" + f"{idx + 1}" +r"})", color=BLACK, font_size=50).next_to(elem.get_right(), RIGHT,
+                                                                                              buff=0.1))
         self.wait(1)
-
-        self.play(FadeIn(pe_label))
-        self.play(FadeOut(pe_label))
+        self.play(FadeIn(pe_label),FadeIn(pe_encoding),FadeIn(label_pe))
         self.wait(1)
+        self.play(pe_encoding.animate.move_to(query_group.get_center()),FadeOut(pe_label),FadeOut(label_pe))
+        label_query.next_to(query_group, UP, buff=0.01)
+        self.play(FadeOut(pe_encoding),query_group.animate.set_color(PURPLE_D),FadeIn(label_query),FadeOut(label_tok))
+        self.wait(1)
+        self.add(key,value,arrow_value,arrow_key)
         #self.add(labeled_input1, labeled_input2, query, key, value, arrow_query, arrow_value, arrow_key)
+        self.wait(1)
+        self.play(Group(query_group,label_query).animate.align_to(key[0],RIGHT))
+        arrow_score_query = Arrow(query_group.get_right(), score.get_left(), color=BLACK,
+                                  stroke_width=arrow_query.stroke_width)
+        self.add(score,arrow_score_key,arrow_score_query)
+        self.wait(1)
+        #group_scores = Group(score, label_score_x, label_score_y)
+        self.add(output[1], output[2])
+        self.play(FadeIn(arrow_score_output), FadeIn(arrow_value_output),FadeIn(output))
+        self.wait(1)
